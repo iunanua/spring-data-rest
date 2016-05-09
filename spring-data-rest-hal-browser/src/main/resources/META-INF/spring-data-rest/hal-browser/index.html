@@ -67,7 +67,7 @@
             <td><%= link.name ? 'name: ' + link.name : 'index: ' + i %></a></td>
             <td>
                 <% if (HAL.isUrl(rel)) { %>
-                <a class="dox" href="<%= HAL.normalizeUrl(HAL.buildUrl(rel)) %>"><i class="icon-book"></i></a>
+                <a class="dox" href="<%= decodeURIComponent(HAL.buildUrl(rel, obj.href)) %>"><i class="icon-book"></i></a>
                 <% } %>
             </td>
             <td>
@@ -89,7 +89,7 @@
             <td><%= obj.name || '' %></td>
             <td>
                 <% if (HAL.isUrl(rel)) { %>
-                <a class="dox" href="<%= HAL.normalizeUrl(HAL.buildUrl(rel)) %>"><i class="icon-book"></i></a>
+                <a class="dox" href="<%= decodeURIComponent(HAL.buildUrl(rel, obj.href)) %>"><i class="icon-book"></i></a>
                 <% } %>
             </td>
             <td>
@@ -231,7 +231,7 @@ Content-Type: application/json
     <div class="accordion-heading">
         <a class="accordion-toggle" href="#"><%= resource.identifier %><% if (resource.title) { %>: <span class="embedded-resource-title"><%- resource.title %></span><% } %>
             <% if (HAL.isUrl(resource.embed_rel)) { %>
-        <span class="dox pull-right" data-href="<%= HAL.normalizeUrl(HAL.buildUrl(resource.embed_rel)) %>">
+        <span class="dox pull-right" data-href="<%= decodeURIComponent(HAL.buildUrl(resource.embed_rel, resource.embed_href)) %>">
           <i class="icon-book"></i>
         </span>
             <% } %>
@@ -279,6 +279,35 @@ Content-Type: application/json
 <script src="js/CustomPostForm.js"></script>
 
 <script>
+	function isCurie(string) {
+    	return string.split(':').length > 1;
+    };
+
+	HAL.buildUrl = function (rel, href) {
+		var urlRegex = /(http|https):\/\/(\w+:{0,1}\w*@)?(\S+)(:[0-9]+)?(\/|\/([\w#!:.?+=&%@!\-\/]))?/;
+	    if (!HAL.currentDocument._links) {
+	        return rel;
+	      }
+	      if (!rel.match(urlRegex) && isCurie(rel) && HAL.currentDocument._links.curies) {
+	        var parts = rel.split(':');
+	        var curies = HAL.currentDocument._links.curies;
+	        for (var i=0; i<curies.length; i++) {
+	          if (curies[i].name == parts[0]) {
+	            var tmpl = uritemplate(curies[i].href);
+	            return tmpl.expand({ rel: parts[1], href: href });
+	          }
+	        }
+	      }
+	      else if (!rel.match(urlRegex) && isCurie(rel) && HAL.currentDocument._links.curie) {
+	        // Backward compatibility with <04 version of spec.
+	        var tmpl = uritemplate(HAL.currentDocument._links.curie.href);
+	        return tmpl.expand({ rel: rel.split(':')[1], href: href });
+	      }
+	      else {
+	        return rel;
+	      }
+	    }.bind(HAL);
+	
     var browser = new HAL.Browser({
         container: $('#browser'),
         entryPoint: '/'

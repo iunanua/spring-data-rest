@@ -284,6 +284,7 @@ Content-Type: application/json
     };
 
 	HAL.buildUrl = function (rel, href) {
+		console.log(rel+" "+href);
 		var urlRegex = /(http|https):\/\/(\w+:{0,1}\w*@)?(\S+)(:[0-9]+)?(\/|\/([\w#!:.?+=&%@!\-\/]))?/;
 	    if (!HAL.currentDocument._links) {
 	        return rel;
@@ -294,14 +295,14 @@ Content-Type: application/json
 	        for (var i=0; i<curies.length; i++) {
 	          if (curies[i].name == parts[0]) {
 	            var tmpl = uritemplate(curies[i].href);
-	            return tmpl.expand({ rel: parts[1], href: href });
+	            return tmpl.expand({ rel: parts[1], href: (""+href).replace("{&projection}", "") });
 	          }
 	        }
 	      }
 	      else if (!rel.match(urlRegex) && isCurie(rel) && HAL.currentDocument._links.curie) {
 	        // Backward compatibility with <04 version of spec.
 	        var tmpl = uritemplate(HAL.currentDocument._links.curie.href);
-	        return tmpl.expand({ rel: rel.split(':')[1], href: href });
+	        return tmpl.expand({ rel: rel.split(':')[1], href: (""+href).replace("{&projection}", "") });
 	      }
 	      else {
 	        return rel;

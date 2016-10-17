@@ -22,7 +22,7 @@
 		<dependency>
 			<groupId>${project.groupId}</groupId>
 			<artifactId>spring-data-rest-webmvc</artifactId>
-			<version>${project.version}</version>
+			<version>2.5.2.RELEASE</version>
 		</dependency>
 
 		<dependency>
@@ -151,5 +151,14 @@
 			</plugins>
 		</pluginManagement>
 	</build>
-
+	<distributionManagement>
+		<snapshotRepository>
+			<id>nexus</id>
+			<url>http://dev.hdivsecurity.com:8081/nexus/content/repositories/snapshots</url>
+		</snapshotRepository>
+		<repository>
+			<id>nexus</id>
+			<url>http://dev.hdivsecurity.com:8081/nexus/content/repositories/releases</url>
+		</repository>
+	</distributionManagement>
 </project>
